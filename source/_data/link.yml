@@ -1,0 +1,8 @@
+class:
+  class_name: 友情链接
+  link_list:
+    1:
+      name: blinkfox
+      link: https://blinkfox.github.io/
+      avatar: https://cdn.xxxxx.top/avatar.png
+      descr: 资深Java攻城狮
