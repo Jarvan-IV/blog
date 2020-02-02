@@ -91,3 +91,5 @@ public interface FeginRemoteInterface {
 ```
 
 根据返回结果说明熔断成功。
+
+[示例github代码下载](https://github.com/Jarvan-IV/spring-cloud-demo)

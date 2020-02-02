@@ -27,49 +27,96 @@ Eureka中间件介入之后，就取代了原来服务集群中维护服务路�
 
 ## 示例
 
-### eureka-server
+> 项目基于较新的 spring boot 2.x
 
-`pom` 依赖
+新建一个项目 `spring-cloud-app`,这是一个父项目，主要的`pom` 内容信息如下：
 
 ```xml
-    <!--这儿使用的 spring boot 版本为 2.0.5.RELEASE-->
-    <!--这儿使用的 spring boot 版本为 2.0.2.BUILD-SNAPSHOT-->
-    <dependencies>
-        <dependency>
-          <groupId>org.springframework.cloud</groupId>
-          <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-starter-test</artifactId>
-          <scope>test</scope>
-        </dependency>
-    </dependencies>
-  <dependencyManagement>
+<properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>1.8</java.version>
+    <cloud.version>Greenwich.SR4</cloud.version>
+    <boot.version>2.1.11.RELEASE</boot.version>
+</properties>
+<dependencyManagement>
+    <!--这儿使用的 spring boot 版本为 2.1.11.RELEASE-->
     <dependencies>
       <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-netflix</artifactId>
-        <version>2.0.2.BUILD-SNAPSHOT</version>
-        <type>pom</type>
-        <scope>import</scope>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter</artifactId>
+        <version>${boot.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
+      <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.6</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+        <version>2.1.11.RELEASE</version>
+      </dependency>
+      <!--这儿使用的 spring-cloud-starter-netflix-eureka 版本为 2.1.4.RELEASE-->
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+        <version>2.1.4.RELEASE</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        <version>2.1.4.RELEASE</version>
+      </dependency>
+      <!--cloud 版本为 Greenwich.SR4-->
+      <!--<dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${cloud.version}</version>
+        <type>pom</type>
+        <scope>runtime</scope>
+      </dependency>-->
     </dependencies>
   </dependencyManagement>
   <repositories>
     <repository>
       <id>spring-snapshots</id>
       <name>Spring Snapshots</name>
-      <url>https://repo.spring.io/libs-snapshot</url>
+      <url>https://repo.spring.io/snapshot</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/milestone</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
   </repositories>
+```
+
+### eureka-server
+
+在 `spring-cloud-app` 中新建 `Module` 为 `eureka-server`，`pom` 依赖：
+
+```xml
+<dependencies>
+    <!--eureka-server-->
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+      <!--<version>2.1.4.RELEASE</version>-->
+    </dependency>
+  </dependencies>
 ```
 
 `application.yml`:
@@ -105,30 +152,27 @@ public class EurekaServerApplication {
 
 访问  `http://localhost:8089/` 即可看到以下页面：
 
-![4a7cd5e77008439f8a725a3e9b6f012e.png](https://i.loli.net/2019/10/07/6wlOhyFuEtBkNxI.png)
+![EurekaServer.png](https://i.loli.net/2019/10/07/6wlOhyFuEtBkNxI.png)
 
 在 `Instances currently registered with Eureka` 栏下，可看到当前没有 `服务` 注册到 `eureka`
 
 ### service-provider
 
-- 如果你的spring cloud 为2.x，则 `pom` 依赖和 `eureka-server` 的 `pom` 保持一致。
-
-- 如果你的 spring cloud 版本是 1.x 只需要将 `eureka-server` 中 `pom` 的
+在 `spring-cloud-app` 中新建 `Module` 为 `service-provider`，这是模拟服务的提供方，`pom` 如下：
 
 ```xml
-        <dependency>
-          <groupId>org.springframework.cloud</groupId>
-          <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
-        </dependency>
-```
-
-替换为：
-
-```xml
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-eureka</artifactId>
-        </dependency>
+<dependencies>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+      <!--<version>2.1.4.RELEASE</version>-->
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <!--<version>2.1.11.RELEASE</version>-->
+    </dependency>
+  </dependencies>
 ```
 
 `application.yml`:
@@ -160,13 +204,15 @@ public class ServiceProviderApplication {
 ```
 
 这时候查看注册中心：
-![image.png](https://i.loli.net/2019/10/07/GmLqkDfzcTVlO42.png)
+![service-provider注册.png](https://i.loli.net/2019/10/07/GmLqkDfzcTVlO42.png)
 
 会发现注册中心多了一个服务 `SERVICE-PROVIDER`。
 
 ### service-consumser
 
-和上面的 `service-provider` 一样，只需更改下 `application.yml`:
+在 `spring-cloud-app` 中新建 `Module` 为 `service-consumser`，这是模拟服务的消费方，`pom` 和 `service-provider` 一样。
+
+修改 `application.yml`:
 
 ```yml
 spring:
@@ -337,3 +383,5 @@ Eviction（失效服务剔除）用来定期（默认为每60秒）在Eureka Ser
 默认失效时间为90秒，也就是如果有服务超过90秒没有向Eureka Server发起Renew请求的话，就会被当做失效服务剔除掉。
 
 失效时间可以通过`eureka.instance.leaseExpirationDurationInSeconds`进行配置，定期扫描时间可以通过`eureka.server.evictionIntervalTimerInMs`进行配置。
+
+[示例github代码下载](https://github.com/Jarvan-IV/spring-cloud-demo)

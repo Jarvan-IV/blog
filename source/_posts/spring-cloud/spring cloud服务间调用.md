@@ -66,15 +66,32 @@ hello，xp，这是provider 提供的信息
 
 使用Fegin调用服务，需要在`service-consumser` 中修改以下几处：
 
-1.在 `pom` 中增加 fegin 依赖：
+1.在 `pom` 中增加 fegin 依赖，完整的pom如下：
 
 ```xml
+    <dependencies>
     <!--fegin 调用-->
     <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-starter-openfeign</artifactId>
-        <version>2.0.2.RELEASE</version>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-openfeign</artifactId>
+      <version>2.1.2.RELEASE</version>
     </dependency>
+    <!--<dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-hystrix</artifactId>
+      <version>1.4.1.RELEASE</version>
+    </dependency>-->
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+      <version>2.1.2.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+      <!--<version>2.1.4.RELEASE</version>-->
+    </dependency>
+  </dependencies>
 ```
 
 2.在启动类 `ServiceConsumserApplication.java` 增加 `@EnableFeignClients` 注解：
@@ -144,7 +161,7 @@ public class UserController {
 3.启动 `service-provider2`。
 此时通过 `http://localhost:8087/` 访问 `eureka-server`，会看到如图的效果：
 
-![34b90774918e4719826d6909b8a1adcd.png](https://i.loli.net/2019/10/07/ZSDsmcEPwgRJfNe.png)
+![注册中心.png](https://i.loli.net/2019/10/07/ZSDsmcEPwgRJfNe.png)
 
 可以看到 `SERVICE-PROVIDER` 服务中有两个 `UP`（` xp:service-provider:9010 , xp:service-provider:9012`），表明注册中心有2个 `SERVICE-PROVIDER` 服务。
 
@@ -160,3 +177,5 @@ public class UserController {
 ```
 
 不断的进行测试下去会发现两种结果交替出现，说明两个服务中心自动提供了`服务均衡负载`的功能。如果我们将服务提供者的数量在提高为N个，测试结果一样，请求会`自动轮询`到每个服务端来处理。
+
+[示例github代码下载](https://github.com/Jarvan-IV/spring-cloud-demo)
